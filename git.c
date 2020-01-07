@@ -10,7 +10,9 @@
 #define USE_PAGER		(1<<2)
 /*
  * require working tree to be present -- anything uses this needs
+ * 需要现在的工作树——任何使用这个需求
  * RUN_SETUP for reading from the configuration file.
+ * RUN_SETUP用于读取配置文件。
  */
 #define NEED_WORK_TREE		(1<<3)
 #define SUPPORT_SUPER_PREFIX	(1<<4)

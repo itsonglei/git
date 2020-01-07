@@ -11,77 +11,111 @@
  * ===========
  *
  * Adding a new built-in
+ * 添加一个新的内存缓存区
  * ---------------------
  *
  * There are 4 things to do to add a built-in command implementation to
+ * 有4个事情要做添加一个内置的命令实现
+ * 分为4部来完成将内存缓存区内置到命令中
  * Git:
  *
  * . Define the implementation of the built-in command `foo` with
+ * 定义内置命令“foo”的实现
  *   signature:
+ * 签名、规则
  *
  *	int cmd_foo(int argc, const char **argv, const char *prefix);
  *
  * . Add the external declaration for the function to `builtin.h`.
+ * 添加外部声明的函数“builtin.h”。
  *
  * . Add the command to the `commands[]` table defined in `git.c`.
+ * 将command命令添加到“commands[]”列表，并且来自于“git.c”。
  *   The entry should look like:
+ * 入口应该看起来像:
  *
  *	{ "foo", cmd_foo, <options> },
  *
  * where options is the bitwise-or of:
+ * options 可选项:
  *
  * `RUN_SETUP`:
+ * 运行安装程序
  *	If there is not a Git directory to work on, abort.  If there
  *	is a work tree, chdir to the top of it if the command was
  *	invoked in a subdirectory.  If there is no work tree, no
  *	chdir() is done.
+如果没有可用的Git目录，则中止。如果有一个工作树，如果命令是在子目录中调用的，则chdir指向它的顶部。如果没有工作树，就不会执行chdir()。
  *
  * `RUN_SETUP_GENTLY`:
+ * 运行设置轻轻
  *	If there is a Git directory, chdir as per RUN_SETUP, otherwise,
  *	don't chdir anywhere.
+如果有一个Git目录，根据RUN_SETUP使用chdir，否则不要使用chdir。
  *
  * `USE_PAGER`:
+ * 使用寻呼机
  *
  *	If the standard output is connected to a tty, spawn a pager and
  *	feed our output to it.
+如果标准输出连接到tty，则生成一个寻呼机并将我们的输出提供给它。
  *
  * `NEED_WORK_TREE`:
+ * 需要工作树
  *
  *	Make sure there is a work tree, i.e. the command cannot act
  *	on bare repositories.
  *	This only makes sense when `RUN_SETUP` is also set.
+确保存在工作树，即命令不能作用于裸存储库。这只有在' RUN_SETUP
+'也被设置时才有意义。
  *
  * `SUPPORT_SUPER_PREFIX`:
+ * 支持超级前缀
  *
  *	The built-in supports `--super-prefix`.
+内置的支持——super-prefix”。
  *
  * `DELAY_PAGER_CONFIG`:
+ * 延迟寻呼机配置
  *
  *	If RUN_SETUP or RUN_SETUP_GENTLY is set, git.c normally handles
  *	the `pager.<cmd>`-configuration. If this flag is used, git.c
  *	will skip that step, instead allowing the built-in to make a
  *	more informed decision, e.g., by ignoring `pager.<cmd>` for
  *	certain subcommands.
+ 如果设置了RUN_SETUP或run_setup_， git.c通常会处理' pager. '
+-configuration。如果使用了这个标志，git.c将跳过这一步，而允许内置程序做出更明智的决定，例如忽略“pager”。
+'用于某些子命令。
  *
  * . Add `builtin/foo.o` to `BUILTIN_OBJS` in `Makefile`.
+ * 添加“内装式/ foo。o’‘BUILTIN_OBJS’的Makefile。
  *
  * Additionally, if `foo` is a new command, there are 4 more things to do:
+ * 另外,如果“foo”是一个新的命令,4有更多的事情要做:
  *
  * . Add tests to `t/` directory.
+ * 添加测试“t /”目录。
  *
  * . Write documentation in `Documentation/git-foo.txt`.
+ * 写文档的文档/ git-foo.txt’。
  *
  * . Add an entry for `git-foo` to `command-list.txt`.
+ * 添加一个条目“git-foo”“command-list.txt”。
  *
  * . Add an entry for `/git-foo` to `.gitignore`.
+ * 添加一个条目为“/ git-foo”“.gitignore”。
  *
  *
  * How a built-in is called
+ * 如何调用内置的
  * ------------------------
  *
  * The implementation `cmd_foo()` takes three parameters, `argc`, `argv,
  * and `prefix`.  The first two are similar to what `main()` of a
  * standalone command would be called with.
+ *
+实现“cmd_foo()”接受三个参数，“argc”、“argv”和“prefix”。前两个类似于使用独立命令的'
+main() '调用。
  *
  * When `RUN_SETUP` is specified in the `commands[]` table, and when you
  * were started from a subdirectory of the work tree, `cmd_foo()` is called
@@ -89,9 +123,14 @@
  * to the subdirectory the command started from.  This allows you to
  * convert a user-supplied pathname (typically relative to that directory)
  * to a pathname relative to the top of the work tree.
+当' commands[] '表中指定' RUN_SETUP
+'时，当您从工作树的一个子目录启动时，'cmd_foo()
+'在chdir(2)之后被调用到工作树的顶部，' prefix
+'获取命令启动的子目录的路径。这允许您将用户提供的路径名(通常相对于该目录)转换为相对于工作树顶部的路径名。
  *
  * The return value from `cmd_foo()` becomes the exit status of the
  * command.
+ * ' cmd_foo() '的返回值成为命令的退出状态
  */
 
 #define DEFAULT_MERGE_LOG_LEN 20
@@ -105,8 +144,7 @@ extern const char git_more_info_string[];
 void prune_packed_objects(int);
 
 struct fmt_merge_msg_opts {
-	unsigned add_title:1,
-		credit_people:1;
+	unsigned add_title : 1, credit_people : 1;
 	int shortlog_len;
 };
 
@@ -119,9 +157,14 @@ int fmt_merge_msg(struct strbuf *in, struct strbuf *out,
  * the built-in, e.g., "foo". If a paging-choice has already been setup, this
  * does nothing. The default in `def` should be 0 for "pager off", 1 for "pager
  * on" or -1 for "punt".
+ * 如果一个内置函数已经设置了DELAY_PAGER_CONFIG，那么内置函数应该在希望尊重'
+ * page .foo '
+ * -config时尽早调用这个函数。“cmd”是内置的名称，例如“foo”。如果已经设置了一个页面选项，则不会执行任何操作。默认的“def”应该是“pager
+ * off”为0，“pager on”为1，“punt”为-1。
  *
  * You should most likely use a default of 0 or 1. "Punt" (-1) could be useful
  * to be able to fall back to some historical compatibility name.
+ * 您最可能使用默认值0或1。“Punt”(-1)可以追溯到一些历史兼容性名称。
  */
 void setup_auto_pager(const char *cmd, int def);
 
